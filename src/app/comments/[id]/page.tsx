@@ -4,7 +4,7 @@ import {useEffect, useRef, useCallback, useState} from "react";
 import {useParams, useRouter} from "next/navigation";
 import {useSelector} from "react-redux";
 import {RootState} from "@/store/store";
-import {fetchComments, addComment, deleteComment} from "@/store/commentsSlice";
+import {fetchComments, addComment, deleteComment, Comment} from "@/store/commentsSlice";
 import Header from "@/components/Header";
 import {Button} from "@/components/ui/button";
 import {Post} from "@/store/postsSlice";
@@ -18,9 +18,17 @@ export default function PostPage() {
     const loading = useSelector((state: RootState) => state.comments.loading);
     const user = useSelector((state: RootState) => state.auth.user);
 
+    // Local coments for faster comment Delete
+    const [localComments, setLocalComments] = useState<Comment[]>(comments);
+
     const bodyRef = useRef<HTMLTextAreaElement>(null);
     const [post, setPost] = useState<Post | null>(null);
     const [postLoading, setPostLoading] = useState(true);
+
+    // update local comments after comments state is updated
+    useEffect(() => {
+        setLocalComments(comments);
+    }, [comments]);
 
     useEffect(() => {
         setPostLoading(true);
@@ -74,6 +82,10 @@ export default function PostPage() {
             alert("You can only delete your own comments!");
             return;
         }
+
+        const updatedComments = localComments.filter(comment => comment.id !== commentId);
+        setLocalComments(updatedComments);
+
         dispatch(deleteComment(commentId));
     };
 
@@ -109,14 +121,15 @@ export default function PostPage() {
 
                         {loading ? (
                             <p>Loading comments...</p>
-                        ) : comments.length > 0 ? (
+                        ) : localComments.length > 0 ? (
                             <ul className="mt-2 space-y-2">
-                                {comments.map((comment) => (
+                                {localComments.map((comment) => (
                                     <li key={comment.id} className="p-2 border rounded flex flex-col">
                                         <span>{comment.body}</span>
                                         {user?.id === comment.userId && (
-                                            <button onClick={() => handleDeleteComment(comment.id, comment.userId)}
-                                                    className="text-red-500 mt-2 self-end cursor-pointer"
+                                            <button
+                                                onClick={() => handleDeleteComment(comment.id, comment.userId)}
+                                                className="text-red-500 mt-2 self-end cursor-pointer"
                                             >
                                                 Delete
                                             </button>
