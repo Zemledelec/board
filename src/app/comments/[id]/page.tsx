@@ -1,69 +1,60 @@
 "use client";
 
-import {useCallback, useEffect, useRef, useState} from "react";
+import {useEffect, useRef, useCallback, useState} from "react";
 import {useParams, useRouter} from "next/navigation";
+import {useDispatch, useSelector} from "react-redux";
+import {RootState} from "@/store/store";
+import {fetchComments, addComment} from "@/store/commentsSlice";
 import Header from "@/components/Header";
 import {Button} from "@/components/ui/button";
 import {Post} from "@/store/postsSlice";
-import {Comment} from "@/store/commentsSlice";
-import {useDispatch, useSelector} from "react-redux";
-import {RootState} from "@/store/store";
 
 export default function PostPage() {
-    const dispatch = useDispatch();
     const {id} = useParams();
     const router = useRouter();
-    const [post, setPost] = useState<Post | null>(null);
-    const [comments, setComments] = useState<Comment[]>([]);
-    const [loading, setLoading] = useState(true);
+    const dispatch = useDispatch();
+    const comments = useSelector((state: RootState) => state.comments.comments);
+    const loading = useSelector((state: RootState) => state.comments.loading);
     const user = useSelector((state: RootState) => state.auth.user);
+
     const bodyRef = useRef<HTMLTextAreaElement>(null);
+    const [post, setPost] = useState<Post | null>(null);
+    const [postLoading, setPostLoading] = useState(true);
 
     useEffect(() => {
-        debugger;
-        const fetchData = async () => {
-            setLoading(true);
+        setPostLoading(true);
+        fetch(`https://my-json-server.typicode.com/Zemledelec/board/posts/${id}`)
+            .then(res => res.json())
+            .then(data => {
+                setPost(data);
+                setPostLoading(false);
+            })
+            .catch(() => {
+                setPostLoading(false);
+            })
 
-            const resPost = await fetch(`https://my-json-server.typicode.com/Zemledelec/board/posts/${id}`);
-            const postData = await resPost.json();
-            setPost(postData);
+        dispatch(fetchComments(Number(id)));
 
-            const resComments = await fetch(`https://my-json-server.typicode.com/Zemledelec/board/comments?postId=${id}`);
-            const commentsData = await resComments.json();
-            setComments(commentsData);
+    }, [dispatch, id]);
 
-            setLoading(false);
-        };
-
-        fetchData();
-    }, [id]);
-
-    const handleCreateComment = useCallback(async () => {
-
+    const handleCreateComment = useCallback(() => {
         if (!user) {
             alert("Error: User not found!");
             return;
         }
 
         if (bodyRef.current?.value.trim()) {
-            const response = await fetch("https://my-json-server.typicode.com/Zemledelec/board/comments", {
-                method: "POST",
-                body: JSON.stringify({
-                    body: bodyRef.current.value,
-                    userId: user.id,
-                    postId: id,
-                }),
-                headers: {"Content-Type": "application/json"},
-            });
+            const newComment = {
+                body: bodyRef.current.value,
+                userId: user.id,
+                postId: Number(id),
+            };
 
-            const newPost = await response.json();
-            dispatch(addComment(newPost));
+            dispatch(addComment(newComment));
+
             bodyRef.current.value = "";
         }
-    }, [user, dispatch]);
-
-
-    if (loading) return <p className="text-center mt-4">Loading post...</p>;
+    }, [user, dispatch, id]);
 
     return (
         <div>
@@ -73,31 +64,31 @@ export default function PostPage() {
                     Back to Posts
                 </Button>
 
-                {post ? (
+                {postLoading ? (
+                    <p className="text-center mt-4">Loading post...</p>
+                ) : post ? (
                     <div className="p-4 border rounded shadow">
                         <h1 className="text-3xl font-bold mb-2">{post.title}</h1>
                         <p>{post.body}</p>
 
-                        {user && (
-                            <div className="mb-6">
-                                <h2 className="text-xl font-semibold mb-2">Create a Comment</h2>
-                                <textarea
-                                    ref={bodyRef}
-                                    placeholder="Comment"
-                                    className="w-full p-2 border rounded mb-2"
-                                    rows={3}
-                                />
-                                <Button
-                                    className="bg-blue-500 text-white"
-                                    onClick={handleCreateComment}
-                                >
-                                    Create Comment
-                                </Button>
-                            </div>
-                        )}
+                        <div className="mb-6">
+                            <h2 className="text-xl font-semibold mb-2">Create a Comment</h2>
+                            <textarea
+                                ref={bodyRef}
+                                placeholder="Comment"
+                                className="w-full p-2 border rounded mb-2"
+                                rows={3}
+                            />
+                            <Button className="bg-blue-500 text-white" onClick={handleCreateComment}>
+                                Create Comment
+                            </Button>
+                        </div>
 
                         <h2 className="text-xl font-semibold mt-4">Comments</h2>
-                        {comments.length > 0 ? (
+
+                        {loading ? (
+                            <p>Loading comments...</p>
+                        ) : comments.length > 0 ? (
                             <ul className="mt-2 space-y-2">
                                 {comments.map((comment) => (
                                     <li key={comment.id} className="p-2 border rounded">
