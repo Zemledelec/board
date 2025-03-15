@@ -4,7 +4,7 @@ import {useEffect, useRef, useCallback, useState} from "react";
 import {useParams, useRouter} from "next/navigation";
 import {useDispatch, useSelector} from "react-redux";
 import {RootState} from "@/store/store";
-import {fetchComments, addComment} from "@/store/commentsSlice";
+import {fetchComments, addComment, deleteComment} from "@/store/commentsSlice";
 import Header from "@/components/Header";
 import {Button} from "@/components/ui/button";
 import {Post} from "@/store/postsSlice";
@@ -56,6 +56,14 @@ export default function PostPage() {
         }
     }, [user, dispatch, id]);
 
+    const handleDeleteComment = (commentId: number, commentUserId: number) => {
+        if (user?.id !== commentUserId) {
+            alert("You can only delete your own comments!");
+            return;
+        }
+        dispatch(deleteComment(commentId));
+    };
+
     return (
         <div>
             <Header/>
@@ -91,8 +99,15 @@ export default function PostPage() {
                         ) : comments.length > 0 ? (
                             <ul className="mt-2 space-y-2">
                                 {comments.map((comment) => (
-                                    <li key={comment.id} className="p-2 border rounded">
-                                        {comment.body}
+                                    <li key={comment.id} className="p-2 border rounded flex flex-col">
+                                        <span>{comment.body}</span>
+                                        {user?.id === comment.userId && (
+                                            <button onClick={() => handleDeleteComment(comment.id, comment.userId)}
+                                                    className="text-red-500 mt-2 self-end cursor-pointer"
+                                            >
+                                                Delete
+                                            </button>
+                                        )}
                                     </li>
                                 ))}
                             </ul>
