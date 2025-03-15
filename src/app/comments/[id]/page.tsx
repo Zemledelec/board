@@ -46,16 +46,14 @@ export default function PostPage() {
 
         if (bodyRef.current?.value.trim()) {
 
-            const newComment = {
-                body: bodyRef.current.value,
-                userId: user.id,
-                postId: Number(id),
-            };
-
             try {
                 const response = await fetch("https://my-json-server.typicode.com/Zemledelec/board/comments", {
                     method: "POST",
-                    body: JSON.stringify(newComment),
+                    body: JSON.stringify({
+                        body: bodyRef.current.value,
+                        userId: user.id,
+                        postId: Number(id),
+                    }),
                     headers: {"Content-Type": "application/json"},
                 });
 
