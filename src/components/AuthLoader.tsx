@@ -2,16 +2,26 @@
 
 import { ReactNode, useEffect, useState } from "react";
 import { useDispatch } from "react-redux";
-import { login } from "@/store/authSlice";
+import { setUser } from "@/store/authSlice";
+import { User } from "@/types";
 
-export default function AuthLoader({ children }: { children: ReactNode }) {
+interface AuthLoaderProps {
+    children: ReactNode;
+}
+
+export default function AuthLoader({ children }: AuthLoaderProps) {
     const dispatch = useDispatch();
     const [loaded, setLoaded] = useState(false);
 
     useEffect(() => {
-        const user = sessionStorage.getItem("user");
-        if (user) {
-            dispatch(login(user));
+        try {
+            const userData = sessionStorage.getItem("user");
+            if (userData) {
+                const parsedUser: User = JSON.parse(userData);
+                dispatch(setUser(parsedUser)); // ✅ Теперь Redux получает правильный объект
+            }
+        } catch (error) {
+            console.error("Failed to load user:", error);
         }
         setLoaded(true);
     }, [dispatch]);

@@ -24,13 +24,19 @@
       "id": 1,
       "postId": 1,
       "userId": 1,
-      "body": "some comment"
+      "body": "some comment 1/1/1"
     },
     {
       "id": 2,
+      "postId": 1,
+      "userId": 2,
+      "body": "some comment 2/1/2"
+    },
+    {
+      "id": 3,
       "postId": 2,
       "userId": 1,
-      "body": "some comment"
+      "body": "some comment 3/2/1"
     }
   ],
   "users": [
