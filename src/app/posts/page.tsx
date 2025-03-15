@@ -79,7 +79,7 @@ export default function PostsPage() {
                         />
                         <textarea
                             ref={bodyRef}
-                            placeholder="Body"
+                            placeholder="Post body"
                             className="w-full p-2 border rounded mb-2"
                             rows={3}
                         />
