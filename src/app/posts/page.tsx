@@ -5,7 +5,6 @@ import {useDispatch, useSelector} from "react-redux";
 import {setPosts, addPost, setLoading, Post} from "@/store/postsSlice";
 import {RootState} from "@/store/store";
 import Header from "@/components/Header";
-import {User} from "@/types";
 import {Button} from "@/components/ui/button";
 import {useRouter} from "next/navigation";
 

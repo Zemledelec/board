@@ -1,7 +1,8 @@
 "use client";
 
-import { createSlice, createAsyncThunk, PayloadAction } from "@reduxjs/toolkit";
-import { RootState } from "./store";
+import {createSlice, createAsyncThunk, PayloadAction, AsyncThunk} from "@reduxjs/toolkit";
+import {RootState} from "./store";
+import {Post} from "@/store/postsSlice";
 
 export type Comment = {
     id: number;
@@ -20,7 +21,7 @@ const initialState: CommentsState = {
     loading: false,
 };
 
-export const fetchComments = createAsyncThunk(
+export const fetchComments: AsyncThunk<Comment[], number, object> = createAsyncThunk(
     "comments/fetchComments",
     async (postId: number) => {
         const response = await fetch(
@@ -32,11 +33,11 @@ export const fetchComments = createAsyncThunk(
 
 export const addComment = createAsyncThunk(
     "comments/addComment",
-    async ({ postId, userId, body }: { postId: number; userId: number; body: string }) => {
+    async ({postId, userId, body}: { postId: number; userId: number; body: string }) => {
         const response = await fetch("https://my-json-server.typicode.com/Zemledelec/board/comments", {
             method: "POST",
-            body: JSON.stringify({ postId, userId, body }),
-            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({postId, userId, body}),
+            headers: {"Content-Type": "application/json"},
         });
         return response.json();
     }

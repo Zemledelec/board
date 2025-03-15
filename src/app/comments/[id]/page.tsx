@@ -2,17 +2,18 @@
 
 import {useEffect, useRef, useCallback, useState} from "react";
 import {useParams, useRouter} from "next/navigation";
-import {useDispatch, useSelector} from "react-redux";
+import {useSelector} from "react-redux";
 import {RootState} from "@/store/store";
 import {fetchComments, addComment, deleteComment} from "@/store/commentsSlice";
 import Header from "@/components/Header";
 import {Button} from "@/components/ui/button";
 import {Post} from "@/store/postsSlice";
+import { useAppDispatch } from "@/store/store";
 
 export default function PostPage() {
     const {id} = useParams();
     const router = useRouter();
-    const dispatch = useDispatch();
+    const dispatch = useAppDispatch();
     const comments = useSelector((state: RootState) => state.comments.comments);
     const loading = useSelector((state: RootState) => state.comments.loading);
     const user = useSelector((state: RootState) => state.auth.user);
@@ -37,22 +38,36 @@ export default function PostPage() {
 
     }, [dispatch, id]);
 
-    const handleCreateComment = useCallback(() => {
+    const handleCreateComment = useCallback(async () => {
         if (!user) {
             alert("Error: User not found!");
             return;
         }
 
         if (bodyRef.current?.value.trim()) {
+
             const newComment = {
                 body: bodyRef.current.value,
                 userId: user.id,
                 postId: Number(id),
             };
 
-            dispatch(addComment(newComment));
+            try {
+                const response = await fetch("https://my-json-server.typicode.com/Zemledelec/board/comments", {
+                    method: "POST",
+                    body: JSON.stringify(newComment),
+                    headers: {"Content-Type": "application/json"},
+                });
 
-            bodyRef.current.value = "";
+                const savedComment = await response.json();
+
+                dispatch(addComment(savedComment));
+
+                bodyRef.current.value = "";
+
+            } catch (error) {
+                console.error("Failed to add comment:", error);
+            }
         }
     }, [user, dispatch, id]);
 
