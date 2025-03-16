@@ -67,6 +67,7 @@ export default function PostPage() {
 
                 const savedComment = await response.json();
 
+                //@todo fake id doesnt work
                 dispatch(addComment(savedComment));
 
                 bodyRef.current.value = "";
