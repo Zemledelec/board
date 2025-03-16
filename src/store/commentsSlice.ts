@@ -1,8 +1,6 @@
 "use client";
 
-import {createSlice, createAsyncThunk, PayloadAction, AsyncThunk} from "@reduxjs/toolkit";
-import {RootState} from "./store";
-import {Post} from "@/store/postsSlice";
+import {createSlice, createAsyncThunk, AsyncThunk} from "@reduxjs/toolkit";
 
 export type Comment = {
     id: number;
