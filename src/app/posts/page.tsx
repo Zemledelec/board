@@ -19,6 +19,12 @@ export default function PostsPage() {
     const titleRef = useRef<HTMLInputElement>(null);
     const bodyRef = useRef<HTMLTextAreaElement>(null);
 
+    useEffect(() => {
+        if (!user) {
+            router.push("/");
+        }
+    }, [user, router]);
+
     const fetchPosts = useCallback(async () => {
         dispatch(setLoading(true));
         const response = await fetch("https://my-json-server.typicode.com/Zemledelec/board/posts");
@@ -60,6 +66,10 @@ export default function PostsPage() {
     const handlePostClick = (postId: number) => {
         router.push(`/comments/${postId}`); // 👈 Роутинг на comments/[id]
     };
+
+    if (!user) {
+        return null;
+    }
 
     return (
         <div>

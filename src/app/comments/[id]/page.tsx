@@ -8,7 +8,7 @@ import {fetchComments, addComment, deleteComment, Comment} from "@/store/comment
 import Header from "@/components/Header";
 import {Button} from "@/components/ui/button";
 import {Post} from "@/store/postsSlice";
-import { useAppDispatch } from "@/store/store";
+import {useAppDispatch} from "@/store/store";
 
 export default function PostPage() {
     const {id} = useParams();
@@ -24,6 +24,12 @@ export default function PostPage() {
     const bodyRef = useRef<HTMLTextAreaElement>(null);
     const [post, setPost] = useState<Post | null>(null);
     const [postLoading, setPostLoading] = useState(true);
+
+    useEffect(() => {
+        if (!user) {
+            router.push("/");
+        }
+    }, [user, router]);
 
     // update local comments after comments state is updated
     useEffect(() => {
@@ -89,6 +95,10 @@ export default function PostPage() {
 
         dispatch(deleteComment(commentId));
     };
+
+    if (!user) {
+        return null;
+    }
 
     return (
         <div>
